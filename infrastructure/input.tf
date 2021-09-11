@@ -41,9 +41,26 @@ variable "subdomain_name" {
   default = "muncruft"
 }
 
-variable "minecraft_port" {
-  type = string
-  default = "25565"
+variable "minecraft_ports" {
+  type = list(map(string))
+  default = [
+    {
+      port = "25565"
+      protocol = "tcp"
+    },
+    {
+      port = "25565"
+      protocol = "udp"
+    },
+    {
+      port = "25575"
+      protocol = "tcp"
+    },
+    {
+      port = "25575"
+      protocol = "udp"
+    }
+  ]
 }
 
 variable "user_data_location" {

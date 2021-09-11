@@ -20,22 +20,26 @@ resource "hcloud_firewall" "minecraft" {
 
   name = "minecraft"
 
-  rule {
-    description = "Minecraft tcp port"
-    direction = "in"
-    protocol = "tcp"
-    port = var.minecraft_port
-    source_ips = [
-      "0.0.0.0/0",
-      "::/0"
-    ]
+  dynamic "rule" {
+    for_each = var.minecraft_ports
+
+    content {
+      description = "Minecraft tcp port in ${setting.value["port"]}"
+      direction = "in"
+      protocol = setting.value["protocol"]
+      port = setting.value["port"]
+      source_ips = [
+        "0.0.0.0/0",
+        "::/0"
+      ]
+    }
   }
 
   rule {
     description = "Minecraft udp port"
     direction = "in"
     protocol  = "udp"
-    port      = var.minecraft_port
+    port      = var.minecraft_ports
     source_ips = [
       "0.0.0.0/0",
       "::/0"
@@ -50,9 +54,9 @@ resource "hcloud_server" "muncruft" {
   server_type = var.hetzner_server_type
   location    = var.hetzner_location
 
-  user_data = "curl -s ${var.user_data_location} | sh"
+  user_data = "apt update && apt install -y curl && curl -s ${var.user_data_location} | sh"
 
-  firewalls_id = [ hcloud_firewall.minecraft.id ]
+  firewall_ids = [ hcloud_firewall.minecraft.id ]
 
   delete_protection = var.delete_protection
   rebuild_protection = var.delete_protection
@@ -64,7 +68,7 @@ resource "hcloud_server" "muncruft" {
 
 resource "hcloud_floating_ip" "public_ip" {
   type      = "ipv4"
-  server_id = hcloud_server.node1.id
+  server_id = hcloud_server.muncruft.id
 
   depends_on = [
     hcloud_server.muncruft,
