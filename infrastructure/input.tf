@@ -53,12 +53,8 @@ variable "minecraft_ports" {
       protocol = "udp"
     },
     {
-      port = "25575"
+      port = "25555"
       protocol = "tcp"
-    },
-    {
-      port = "25575"
-      protocol = "udp"
     }
   ]
 }
