@@ -87,7 +87,7 @@ jobs:
           BACKEND_PWD: ${{ secrets.BACKEND_PWD }}
         run: |
           if [ -f "$ZIP_PATH" ]; then
-            unzip -P "$BACKEND_PWD" "$ZIP_PATH" -d backend/
+            unzip -P "$BACKEND_PWD" "$ZIP_PATH" -d ./
             rm "$ZIP_PATH"
           else
             echo "No contains any zip in backup repository"
@@ -97,6 +97,7 @@ jobs:
         run: |
           echo $(pwd)
           cd backend/
+          ls -la
           echo $(cat README.md)
           echo $GITHUB_SHA > README.md
           echo "-------" >> README.md
