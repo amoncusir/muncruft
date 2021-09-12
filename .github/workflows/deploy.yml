@@ -46,6 +46,8 @@ jobs:
     if: ${{ github.ref == 'refs/heads/main' }}
 #    needs: check
     environment: 'cloud'
+    env:
+      ZIP_PATH: backend/muncruft.zip
     defaults:
       run:
         shell: bash
@@ -84,8 +86,8 @@ jobs:
         env:
           BACKEND_PWD: ${{ secrets.BACKEND_PWD }}
         run: |
-          if [ -f "backend/muncruft.zip" ]; then
-            unzip -P "$BACKEND_PWD" "muncruft.zip" -d backend/
+          if [ -f "$ZIP_PATH" ]; then
+            unzip -P "$BACKEND_PWD" "$ZIP_PATH" -d backend/
             rm "muncruft.zip"
           else
             echo "No contains any zip in backup repository"
@@ -105,7 +107,7 @@ jobs:
           BACKEND_PWD: ${{ secrets.BACKEND_PWD }}
         run: |
           if [ -n "$(ls -A backend 2>/dev/null)" ]; then
-            zip -mr -e --password "$BACKEND_PWD" "backend/muncruft.zip" ./backend/*
+            zip -mr -e --password "$BACKEND_PWD" "$ZIP_PATH" ./backend/*
           else
             echo "No contains any file in backup repository"
           fi
