@@ -7,6 +7,9 @@ bash:
 bash-test:
 	./scripts/bash_test.sh
 
+tf-plan:
+	terraform -chdir="./infrastructure" plan -var-file="local.tfvars"
+
 test:
 	docker run -it --rm ubuntu:20.04 bash -c "`cat user_data.sh`"
 
