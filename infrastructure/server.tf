@@ -1,4 +1,11 @@
 
+locals {
+  user_data = templatefile("${path.module}/data/user_data.sh", {
+    rcon_password    = var.rcon_password
+    environment_vars = var.environment_vars
+  })
+}
+
 resource "hcloud_firewall" "ssh" {
 
   count = var.enable_ssh ? 1 : 0
@@ -7,8 +14,8 @@ resource "hcloud_firewall" "ssh" {
 
   rule {
     direction = "in"
-    protocol = "tcp"
-    port = "22"
+    protocol  = "tcp"
+    port      = "22"
     source_ips = [
       "0.0.0.0/0",
       "::/0"
@@ -24,41 +31,30 @@ resource "hcloud_firewall" "minecraft" {
     for_each = var.minecraft_ports
 
     content {
-      description = "Minecraft tcp port in ${setting.value["port"]}"
-      direction = "in"
-      protocol = setting.value["protocol"]
-      port = setting.value["port"]
+      description = "Minecraft tcp port in ${rule.value["port"]}"
+      direction   = "in"
+      protocol    = rule.value["protocol"]
+      port        = rule.value["port"]
       source_ips = [
         "0.0.0.0/0",
         "::/0"
       ]
     }
   }
-
-  rule {
-    description = "Minecraft udp port"
-    direction = "in"
-    protocol  = "udp"
-    port      = var.minecraft_ports
-    source_ips = [
-      "0.0.0.0/0",
-      "::/0"
-    ]
-  }
 }
 
 resource "hcloud_server" "muncruft" {
-  name        = "muncruft-ubuntu"
-  image       = "ubuntu-20.04"
+  name  = "muncruft-ubuntu"
+  image = "ubuntu-20.04"
 
   server_type = var.hetzner_server_type
   location    = var.hetzner_location
 
-  user_data = "apt update && apt install -y curl && curl -s ${var.user_data_location} | sh"
+  user_data = local.user_data
 
-  firewall_ids = [ hcloud_firewall.minecraft.id ]
+  firewall_ids = [hcloud_firewall.minecraft.id]
 
-  delete_protection = var.delete_protection
+  delete_protection  = var.delete_protection
   rebuild_protection = var.delete_protection
 
   depends_on = [

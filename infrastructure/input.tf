@@ -1,6 +1,6 @@
 
 variable "aws_region" {
-  type = string
+  type    = string
   default = "eu-west-1"
 }
 
@@ -17,27 +17,27 @@ variable "hetzner_token" {
 }
 
 variable "hetzner_server_type" {
-  type = string
+  type    = string
   default = "cx21"
 }
 
 variable "hetzner_location" {
-  type = string
+  type    = string
   default = "fsn1"
 }
 
 variable "enable_ssh" {
-  type = bool
+  type    = bool
   default = false
 }
 
 variable "delete_protection" {
-  type = bool
+  type    = bool
   default = true
 }
 
 variable "subdomain_name" {
-  type = string
+  type    = string
   default = "muncruft"
 }
 
@@ -45,21 +45,35 @@ variable "minecraft_ports" {
   type = list(map(string))
   default = [
     {
-      port = "25565"
+      port     = "25565"
       protocol = "tcp"
     },
     {
-      port = "25565"
+      port     = "25565"
       protocol = "udp"
     },
     {
-      port = "25555"
+      port     = "25555"
       protocol = "tcp"
     }
   ]
 }
 
-variable "user_data_location" {
+variable "rcon_password" {
   type = string
+}
+
+variable "user_data_location" {
+  type    = string
   default = "https://raw.githubusercontent.com/amoncusir/muncruft/main/user_data.sh"
+}
+
+variable "environment_vars" {
+  type    = list(map(string))
+  default = []
+}
+
+variable "sensitive_data" {
+  type    = bool
+  default = false
 }
