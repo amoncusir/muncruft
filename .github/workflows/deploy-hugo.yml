@@ -1,0 +1,107 @@
+name: "Minecraft Deploy"
+
+on: push
+
+jobs:
+
+  check:
+    name: Check Terraform
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: infrastructure
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v2
+
+      - name: Setup Terraform
+        uses: hashicorp/setup-terraform@v1
+        with:
+          hetzner_token: ${{ secrets.HCLOUD_TOKEN }}
+          aws_access_key: ${{ secrets.AWS_ACCESS_KEY }}
+          aws_secret_key: ${{ secrets.AWS_SECRET_KEY }}
+
+      - name: Terraform FMT
+        id: fmt
+        run: terraform fmt -check
+        continue-on-error: true
+
+      - name: Terraform Init
+        id: init
+        run: terraform init
+
+      - name: Terraform Validate
+        id: validate
+        run: terraform validate -no-color
+
+      - name: Terraform Plan
+        id: plan
+        run: terraform plan -no-color
+        continue-on-error: true
+
+  deploy:
+    name: Deploy Server
+    runs-on: ubuntu-20.04
+#    if: ${{ github.ref == 'refs/heads/main' }}
+    needs: check
+#    environment: 'cloud'
+    defaults:
+      run:
+        shell: bash
+        working-directory: infrastructure
+    steps:
+      - name: Check Out
+        uses: actions/checkout@v2
+        with:
+          submodules: true
+
+#      - name: Setup Terraform
+#        uses: hashicorp/setup-terraform@v1
+#        with:
+#          hetzner_token: ${{ secrets.HCLOUD_TOKEN }}
+#          aws_access_key: ${{ secrets.AWS_ACCESS_KEY }}
+#          aws_secret_key: ${{ secrets.AWS_SECRET_KEY }}
+#
+#      - name: Terraform FMT
+#        id: fmt
+#        run: terraform fmt -check
+#        continue-on-error: true
+#
+#      - name: Terraform Init
+#        id: init
+#        run: terraform init
+
+      - name: Check Backend
+        run: ls -la backend/
+
+      - name: Edit Backend README.md
+        run: |
+          cat README.md
+          echo $GITHUB_SHA >> README.md
+
+      - name: Terraform Save State
+        uses: actions/checkout@v2
+        with:
+          repository: amoncusir/muncruft-backend
+          token: ${{ secrets.PAT_GITHUB }}
+          path: backend
+        run: |
+          cd backend
+          git config user.name github-actions
+          git config user.email github-actions@github.com
+          git add .
+          git commit -m "generated"
+          git push
+
+
+#      - name: Set Up Server
+
+#      - name: Read .env
+#        id: env-project
+#        run: |
+#          . ./.env
+#          echo "::set-output name=HUGO_VERSION::${HUGO_VERSION}"
+#          echo "::set-output name=EXTERNAL_DOMAIN::${EXTERNAL_DOMAIN}"
+#          echo "::set-output name=GIT_DEPLOY_BRANCH::${GIT_DEPLOY_BRANCH}"
+
