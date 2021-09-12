@@ -82,9 +82,11 @@ jobs:
 
       - name: Edit Backend README.md
         run: |
+          echo $(pwd)
           cd backend/
-          cat README.md
-          echo $GITHUB_SHA >> README.md
+          echo $(cat README.md)
+          echo $GITHUB_SHA > README.md
+          echo $(cat README.md)
 
       - name: Terraform Save State
         run: |
