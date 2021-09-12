@@ -51,6 +51,8 @@ jobs:
         shell: bash
         working-directory: infrastructure
     steps:
+      - uses: montudor/action-zip@v1
+
       - name: Checkout
         uses: actions/checkout@v2
 
@@ -61,27 +63,30 @@ jobs:
           token: ${{ secrets.PAT_GITHUB }}
           path: infrastructure/backend
 
-#      - name: Setup Terraform
-#        uses: hashicorp/setup-terraform@v1
-#        with:
-#          hetzner_token: ${{ secrets.HCLOUD_TOKEN }}
-#          aws_access_key: ${{ secrets.AWS_ACCESS_KEY }}
-#          aws_secret_key: ${{ secrets.AWS_SECRET_KEY }}
-#
-#      - name: Terraform FMT
-#        id: fmt
-#        run: terraform fmt -check
-#        continue-on-error: true
-#
-#      - name: Terraform Init
-#        id: init
-#        run: terraform init
+      - name: Setup Terraform
+        uses: hashicorp/setup-terraform@v1
+        with:
+          hetzner_token: ${{ secrets.HCLOUD_TOKEN }}
+          aws_access_key: ${{ secrets.AWS_ACCESS_KEY }}
+          aws_secret_key: ${{ secrets.AWS_SECRET_KEY }}
 
-      - name: Check Backend
+      - name: Terraform FMT
+        id: fmt
+        run: terraform fmt -check
+        continue-on-error: true
+
+      - name: Terraform Init
+        id: init
+        run: terraform init
+
+      - name: Decrypt Backend
         run: |
-          ls -la backend/
-          ls -la .
-          ls -la ..
+          if [ -f "backend/muncruft.zip" ]; then
+            zip -1mr -P "12345" "muncruft.zip" -d backend/
+            rm "muncruft.zip"
+          else
+            echo "No contains any zip in backup repository"
+          fi
 
       - name: Edit Backend README.md
         run: |
@@ -91,6 +96,14 @@ jobs:
           echo $GITHUB_SHA > README.md
           echo $(cat README.md)
 
+      - name: Encrypt Backend
+        run: |
+          if [ -n "$(ls -A backend 2>/dev/null)" ]; then
+            zip -1mr -e --password "12345" "backend/muncruft.zip" ./backend/*
+          else
+            echo "No contains any file in backup repository"
+          fi
+
       - name: Terraform Save State
         run: |
           cd backend
@@ -99,15 +112,4 @@ jobs:
           git add .
           git commit -m "generated"
           git push
-
-
-#      - name: Set Up Server
-
-#      - name: Read .env
-#        id: env-project
-#        run: |
-#          . ./.env
-#          echo "::set-output name=HUGO_VERSION::${HUGO_VERSION}"
-#          echo "::set-output name=EXTERNAL_DOMAIN::${EXTERNAL_DOMAIN}"
-#          echo "::set-output name=GIT_DEPLOY_BRANCH::${GIT_DEPLOY_BRANCH}"
 
