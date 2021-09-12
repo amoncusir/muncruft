@@ -51,10 +51,15 @@ jobs:
         shell: bash
         working-directory: infrastructure
     steps:
-      - name: Check Out
+      - name: Checkout
+        uses: actions/checkout@v2
+
+      - name: Checkout Backend
         uses: actions/checkout@v2
         with:
-          submodules: true
+          repository: amoncusir/muncruft-backend
+          token: ${{ secrets.PAT_GITHUB }}
+          path: backend
 
 #      - name: Setup Terraform
 #        uses: hashicorp/setup-terraform@v1
@@ -80,13 +85,6 @@ jobs:
           cd backend/
           cat README.md
           echo $GITHUB_SHA >> README.md
-
-      - name: Configure Checkout action
-        uses: actions/checkout@v2
-        with:
-          repository: amoncusir/muncruft-backend
-          token: ${{ secrets.PAT_GITHUB }}
-          path: backend
 
       - name: Terraform Save State
         run: |
