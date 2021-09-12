@@ -62,6 +62,7 @@ jobs:
           repository: amoncusir/muncruft-backend
           token: ${{ secrets.PAT_GITHUB }}
           path: infrastructure/backend
+          ref: main
 
       - name: Setup Terraform
         uses: hashicorp/setup-terraform@v1
@@ -80,9 +81,11 @@ jobs:
         run: terraform init
 
       - name: Decrypt Backend
+        env:
+          BACKEND_PWD: ${{ secrets.BACKEND_PWD }}
         run: |
           if [ -f "backend/muncruft.zip" ]; then
-            zip -1mr -P "12345" "muncruft.zip" -d backend/
+            unzip -P "$BACKEND_PWD" "muncruft.zip" -d backend/
             rm "muncruft.zip"
           else
             echo "No contains any zip in backup repository"
@@ -97,9 +100,11 @@ jobs:
           echo $(cat README.md)
 
       - name: Encrypt Backend
+        env:
+          BACKEND_PWD: ${{ secrets.BACKEND_PWD }}
         run: |
           if [ -n "$(ls -A backend 2>/dev/null)" ]; then
-            zip -1mr -e --password "12345" "backend/muncruft.zip" ./backend/*
+            zip -mr -e --password "$BACKEND_PWD" "backend/muncruft.zip" ./backend/*
           else
             echo "No contains any file in backup repository"
           fi
