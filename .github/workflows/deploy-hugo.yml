@@ -80,12 +80,14 @@ jobs:
           cat README.md
           echo $GITHUB_SHA >> README.md
 
-      - name: Terraform Save State
+      - name: Configure Checkout action
         uses: actions/checkout@v2
         with:
           repository: amoncusir/muncruft-backend
           token: ${{ secrets.PAT_GITHUB }}
           path: backend
+
+      - name: Terraform Save State
         run: |
           cd backend
           git config user.name github-actions
