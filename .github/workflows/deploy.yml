@@ -97,6 +97,7 @@ jobs:
           cd backend/
           echo $(cat README.md)
           echo $GITHUB_SHA > README.md
+          echo "-------" >> README.md
           echo $(cat README.md)
 
       - name: Encrypt Backend
