@@ -4,48 +4,48 @@ on: push
 
 jobs:
 
-  check:
-    name: Check Terraform
-    runs-on: ubuntu-latest
-    defaults:
-      run:
-        working-directory: infrastructure
-
-    steps:
-      - name: Checkout
-        uses: actions/checkout@v2
-
-      - name: Setup Terraform
-        uses: hashicorp/setup-terraform@v1
-        with:
-          hetzner_token: ${{ secrets.HCLOUD_TOKEN }}
-          aws_access_key: ${{ secrets.AWS_ACCESS_KEY }}
-          aws_secret_key: ${{ secrets.AWS_SECRET_KEY }}
-
-      - name: Terraform FMT
-        id: fmt
-        run: terraform fmt -check
-        continue-on-error: true
-
-      - name: Terraform Init
-        id: init
-        run: terraform init
-
-      - name: Terraform Validate
-        id: validate
-        run: terraform validate -no-color
-
-      - name: Terraform Plan
-        id: plan
-        run: terraform plan -no-color
-        continue-on-error: true
+#  check:
+#    name: Check Terraform
+#    runs-on: ubuntu-latest
+#    defaults:
+#      run:
+#        working-directory: infrastructure
+#
+#    steps:
+#      - name: Checkout
+#        uses: actions/checkout@v2
+#
+#      - name: Setup Terraform
+#        uses: hashicorp/setup-terraform@v1
+#        with:
+#          hetzner_token: ${{ secrets.HCLOUD_TOKEN }}
+#          aws_access_key: ${{ secrets.AWS_ACCESS_KEY }}
+#          aws_secret_key: ${{ secrets.AWS_SECRET_KEY }}
+#
+#      - name: Terraform FMT
+#        id: fmt
+#        run: terraform fmt -check
+#        continue-on-error: true
+#
+#      - name: Terraform Init
+#        id: init
+#        run: terraform init
+#
+#      - name: Terraform Validate
+#        id: validate
+#        run: terraform validate -no-color
+#
+#      - name: Terraform Plan
+#        id: plan
+#        run: terraform plan -no-color
+#        continue-on-error: true
 
   deploy:
     name: Deploy Server
-    runs-on: ubuntu-20.04
-#    if: ${{ github.ref == 'refs/heads/main' }}
+    runs-on: ubuntu-latest
+    if: ${{ github.ref == 'refs/heads/main' }}
     needs: check
-#    environment: 'cloud'
+    environment: 'cloud'
     defaults:
       run:
         shell: bash
