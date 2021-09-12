@@ -59,7 +59,7 @@ jobs:
         with:
           repository: amoncusir/muncruft-backend
           token: ${{ secrets.PAT_GITHUB }}
-          path: backend
+          path: infrastructure/backend
 
 #      - name: Setup Terraform
 #        uses: hashicorp/setup-terraform@v1
